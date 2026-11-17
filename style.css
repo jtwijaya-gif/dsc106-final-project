@@ -1,23 +1,81 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: Arial, sans-serif;
-    background: #f5f7fa;
-    color: #222;
+    background: #f3f7fb;
+    color: #263747;
     margin: 0;
-    padding: 40px;
-  }
-  
-  main {
-    max-width: 900px;
+    padding: 50px 24px;
+    line-height: 1.6;
+}
+
+main {
+    max-width: 1050px;
     margin: auto;
-  }
-  
-  h1 {
-    color: #204a70;
-  }
-  
-  section {
-    background: white;
-    padding: 25px;
+}
+
+h1 {
+    color: #173b5e;
+    font-size: 38px;
+    margin: 0 0 5px;
+}
+
+h2 {
+    color: #234e70;
+    font-size: 22px;
+    margin-top: 0;
+}
+
+h3 {
+    color: #263747;
+    font-size: 17px;
     margin-top: 25px;
-    border-radius: 10px;
-  }
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #475569;
+}
+
+main > p {
+    max-width: 750px;
+    font-size: 18px;
+    margin-bottom: 35px;
+}
+
+section {
+    background: white;
+    padding: 35px;
+    margin-top: 25px;
+    border: 1px solid #dce7f0;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+#visualization {
+    width: 100%;
+    overflow-x: auto;
+    padding-top: 15px;
+}
+
+#visualization svg {
+    max-width: 100%;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 25px 15px;
+    }
+
+    h1 {
+        font-size: 30px;
+    }
+
+    section {
+        padding: 22px;
+    }
+}
