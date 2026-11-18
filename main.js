@@ -52,7 +52,12 @@ function build(meta, bytes, landTopo) {
   const { offset, scale } = meta.decode;
   const latSouthToNorth = lat[0] < lat[lat.length - 1];
 
-  const state = { s: scenarios.length - 1, year: 2100, hover: null };
+  const state = {
+    s: scenarios.length - 1,
+    year: 2100,
+    hover: null,
+    selected: null
+  };
 
   // ------------------------------------------------------------------ helpers
   const frameIndex = (year, s) =>
@@ -232,6 +237,165 @@ function build(meta, bytes, landTopo) {
       setYear(Math.round(x.invert(mx)));
     });
 
+
+
+  // ------------------------------------------------------------------ selected location chart
+
+  const localPanel = mapWrap.append("div")
+    .attr("class", "wv-local-panel")
+    .style("display", "none");
+
+  const localHeader = localPanel.append("div")
+    .attr("class", "wv-local-header");
+
+  const localTitle = localHeader.append("h3");
+
+  const resetBtn = localHeader.append("button")
+    .text("✕ Close");
+
+  localPanel.append("p")
+    .text("Temperature change at the selected grid cell, compared across emissions scenarios.");
+
+  const localSvg = localPanel.append("svg")
+    .attr("class", "wv-line")
+    .attr("viewBox", `0 0 ${LW} ${LH}`);
+
+  let localRule, localDot, localY;
+
+  function drawLocalChart() {
+    if (!state.selected) {
+      localPanel.style("display", "none");
+      return;
+    }
+
+    localPanel.style("display", "block");
+    localSvg.selectAll("*").remove();
+
+    const { i, j } = state.selected;
+    const latitude = lat[j];
+    const longitude = meta.lon[i];
+
+    localTitle.text(
+      `Local warming at ${Math.abs(latitude).toFixed(1)}°${latitude >= 0 ? "N" : "S"}, ` +
+      `${Math.abs(longitude).toFixed(1)}°${longitude >= 0 ? "E" : "W"}`
+    );
+
+    // Historical temperatures at this location
+    const historical = d3.range(h0, h1 + 1)
+      .map(year => [year, valueAt(year, 0, j, i)]);
+
+    // Future temperatures under each emissions scenario
+    const futures = scenarios.map((id, k) => [
+      historical[historical.length - 1],
+      ...d3.range(s0, s1 + 1)
+        .map(year => [year, valueAt(year, k, j, i)])
+    ]);
+
+    const allValues = [
+      ...historical.map(d => d[1]),
+      ...futures.flatMap(series => series.map(d => d[1]))
+    ];
+
+    localY = d3.scaleLinear()
+      .domain([Math.min(-1, d3.min(allValues)),
+              Math.max(1, d3.max(allValues))])
+      .nice()
+      .range([LH - M.b, M.t]);
+
+    // Axes
+    localSvg.append("g")
+      .attr("class", "wv-grid")
+      .attr("transform", `translate(${M.l},0)`)
+      .call(d3.axisLeft(localY)
+        .ticks(6)
+        .tickSize(-(LW - M.l - M.r))
+        .tickFormat(d => `${d > 0 ? "+" : ""}${d}°C`));
+
+    localSvg.append("g")
+      .attr("class", "wv-axis")
+      .attr("transform", `translate(0,${LH - M.b})`)
+      .call(d3.axisBottom(x).ticks(10).tickFormat(d3.format("d")));
+
+    const localLine = d3.line()
+      .x(d => x(d[0]))
+      .y(d => localY(d[1]));
+
+    // Historical line
+    localSvg.append("path")
+      .datum(historical)
+      .attr("d", localLine)
+      .attr("fill", "none")
+      .attr("stroke", HIST_COLOR)
+      .attr("stroke-width", 1.7);
+
+    // Four future scenario lines
+    futures.forEach((series, k) => {
+      localSvg.append("path")
+        .datum(series)
+        .attr("d", localLine)
+        .attr("fill", "none")
+        .attr("class", "wv-local-scenario")
+        .attr("data-index", k)
+        .attr("stroke", SCENARIO_INFO[scenarios[k]].color)
+        .attr("stroke-width", 2);
+
+      localSvg.append("text")
+        .attr("x", x(s1) + 6)
+        .attr("y", localY(series[series.length - 1][1]))
+        .attr("dy", "0.35em")
+        .style("fill", SCENARIO_INFO[scenarios[k]].color)
+        .style("font-size", "12px")
+        .text(SCENARIO_INFO[scenarios[k]].label);
+    });
+
+    // Current year marker
+    localRule = localSvg.append("line")
+      .attr("y1", M.t)
+      .attr("y2", LH - M.b)
+      .attr("class", "wv-rule");
+
+    localDot = localSvg.append("circle")
+      .attr("r", 5)
+      .attr("class", "wv-dot");
+
+    updateLocalChart();
+  }
+
+  function updateLocalChart() {
+    if (!state.selected || !localRule) return;
+
+    const { i, j } = state.selected;
+    const temp = valueAt(state.year, state.s, j, i);
+
+    localRule
+      .attr("x1", x(state.year))
+      .attr("x2", x(state.year));
+
+    localDot
+      .attr("cx", x(state.year))
+      .attr("cy", localY(temp))
+      .attr("fill", state.year <= h1
+        ? HIST_COLOR
+        : SCENARIO_INFO[scenarios[state.s]].color);
+
+    localSvg.selectAll(".wv-local-scenario")
+      .attr("stroke-width", function() {
+        return +this.getAttribute("data-index") === state.s ? 3 : 1.3;
+      })
+      .attr("opacity", function() {
+        return +this.getAttribute("data-index") === state.s ? 1 : 0.35;
+      });
+  }
+
+  resetBtn.on("click", () => {
+    state.selected = null;
+    localRule = null;
+    localPanel.style("display", "none");
+    drawMap();
+  });
+
+
+
   // ------------------------------------------------------------------ drawing
   function drawMap() {
     const base = frameIndex(state.year, state.s) * cellsPerFrame;
@@ -258,6 +422,23 @@ function build(meta, bytes, landTopo) {
       ctx.lineWidth = 0.8;
       ctx.stroke();
     }
+
+    // highlight the selected map location
+    if (state.selected) {
+      const { i, row } = state.selected;
+
+      const cw = MAP_W / nlon;
+      const ch = MAP_H / nlat;
+
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(i * cw, row * ch, cw, ch);
+
+      ctx.strokeStyle = "#173b5e";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(i * cw, row * ch, cw, ch);
+    }
+
     if (state.hover) {
       const { i, row } = state.hover;
       const cw = MAP_W / nlon, ch = MAP_H / nlat;
@@ -311,6 +492,7 @@ function build(meta, bytes, landTopo) {
     drawMap();
     updateText();
     updateTooltip();
+    updateLocalChart();
   }
 
   function setYear(yr) {
@@ -335,6 +517,35 @@ function build(meta, bytes, landTopo) {
     updateTooltip();
   });
   canvas.on("mouseleave", () => { state.hover = null; drawMap(); updateTooltip(); });
+
+  // Select a grid cell when the map is clicked
+  canvas.on("click", (event) => {
+    const rect = canvas.node().getBoundingClientRect();
+
+    const px = event.clientX - rect.left;
+    const py = event.clientY - rect.top;
+
+    const i = Math.floor((px / rect.width) * nlon);
+    const row = Math.floor((py / rect.height) * nlat);
+
+    if (i < 0 || i >= nlon || row < 0 || row >= nlat) return;
+
+    const j = latSouthToNorth ? nlat - 1 - row : row;
+
+    state.selected = { i, j, row };
+
+    const clickedRight = px > rect.width / 2;
+    const clickedBottom = py > rect.height / 2;
+
+    localPanel
+      .style("left", clickedRight ? "12px" : "auto")
+      .style("right", clickedRight ? "auto" : "12px")
+      .style("top", clickedBottom ? "12px" : "auto")
+      .style("bottom", clickedBottom ? "auto" : "12px");
+    
+    drawLocalChart();
+    drawMap();
+  });
 
   let timer = null;
   const stop = () => { if (timer) timer.stop(); timer = null; playBtn.text("▶ Play 2015 → 2100"); };

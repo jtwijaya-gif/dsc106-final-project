@@ -285,3 +285,59 @@ section {
         padding: 22px;
     }
 }
+
+/* Linked map-location temperature chart */
+
+.wv-local-panel {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: min(480px, calc(50% - 24px));
+    max-height: calc(100% - 24px);
+    overflow-y: auto;
+    z-index: 5;
+
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid #dce7f0;
+    border-radius: 12px;
+    padding: 18px;
+
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+}
+
+.wv-local-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.wv-local-header h3 {
+    color: #234e70;
+    margin: 0;
+}
+
+.wv-local-header button {
+    background: white;
+    color: #234e70;
+    border: 1px solid #234e70;
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+.wv-local-header button:hover {
+    background: #234e70;
+    color: white;
+}
+
+.wv-local-panel p {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.wv-local-panel svg {
+    width: 100%;
+    height: auto;
+}
