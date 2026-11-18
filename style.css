@@ -66,6 +66,212 @@ section {
     max-width: 100%;
 }
 
+/* ---------------------------------------------------------------
+   Interactive warming map (main.js)
+   --------------------------------------------------------------- */
+.warming-viz {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-x: visible;
+}
+
+.wv-loading {
+    color: #64748b;
+    font-style: italic;
+}
+
+.wv-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #f6f9fc;
+    border: 1px solid #dce7f0;
+    border-radius: 10px;
+    padding: 14px 18px;
+}
+
+.wv-row {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr) 210px;
+    align-items: center;
+    gap: 14px;
+}
+
+.wv-row label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #234e70;
+}
+
+.wv-row input[type="range"] {
+    width: 100%;
+    accent-color: #234e70;
+    cursor: pointer;
+}
+
+.wv-out {
+    font-size: 15px;
+    font-weight: bold;
+    color: #173b5e;
+    font-variant-numeric: tabular-nums;
+}
+
+.wv-ticks {
+    display: flex;
+    justify-content: space-between;
+    margin: -6px 224px 4px 164px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.wv-buttons {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.wv-buttons button {
+    font: inherit;
+    font-size: 14px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid #234e70;
+    background: white;
+    color: #234e70;
+    cursor: pointer;
+}
+
+.wv-buttons button:hover {
+    background: #234e70;
+    color: white;
+}
+
+.wv-note {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.wv-map {
+    position: relative;
+}
+
+.wv-map canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2 / 1;
+    border-radius: 8px;
+    border: 1px solid #dce7f0;
+    cursor: crosshair;
+}
+
+.wv-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #263747;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    white-space: nowrap;
+    transition: opacity 0.1s;
+}
+
+.wv-tt-val {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.wv-tt-sub {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.wv-legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.wv-legend svg text {
+    font-size: 11px;
+    fill: #475569;
+}
+
+.wv-stat {
+    margin: 0;
+    font-size: 16px;
+}
+
+.wv-line {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+}
+
+.wv-line text {
+    font-size: 12px;
+}
+
+.wv-grid line {
+    stroke: #e2e8f0;
+}
+
+.wv-grid text,
+.wv-axis text {
+    fill: #64748b;
+}
+
+.wv-axis path,
+.wv-axis line {
+    stroke: #94a3b8;
+}
+
+.wv-baseband {
+    fill: #94a3b8;
+    opacity: 0.18;
+}
+
+.wv-split {
+    stroke: #94a3b8;
+    stroke-dasharray: 4 4;
+}
+
+.wv-rule {
+    stroke: #173b5e;
+    stroke-width: 1.2;
+}
+
+.wv-dot {
+    stroke: white;
+    stroke-width: 2;
+}
+
+.wv-small {
+    font-size: 12px;
+    fill: #475569;
+    font-weight: bold;
+}
+
+@media (max-width: 700px) {
+    .wv-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .wv-ticks {
+        margin: -4px 0 4px;
+    }
+}
+
 @media (max-width: 600px) {
     body {
         padding: 25px 15px;
