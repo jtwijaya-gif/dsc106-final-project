@@ -41,7 +41,7 @@ p {
     color: #475569;
 }
 
-main > p {
+main>p {
     max-width: 750px;
     font-size: 18px;
     margin-bottom: 35px;
@@ -340,4 +340,61 @@ section {
 .wv-local-panel svg {
     width: 100%;
     height: auto;
+}
+
+/* Final website improvements */
+
+main>h2 {
+    margin-bottom: 15px;
+}
+
+section>p {
+    margin-bottom: 18px;
+}
+
+section>p:last-child {
+    margin-bottom: 0;
+}
+
+/* Visualization spacing */
+
+#visualization {
+    margin-top: 10px;
+}
+
+/* Key takeaway */
+
+.takeaway {
+    background: #f3f7fb;
+    border-left: 4px solid #234e70;
+    padding: 15px 20px;
+    border-radius: 6px;
+    margin-top: 25px;
+}
+
+.takeaway h3 {
+    margin: 0 0 10px;
+    color: #173b5e;
+}
+
+.takeaway p {
+    margin: 0;
+}
+
+/* Small screen improvements */
+
+@media (max-width: 700px) {
+    .wv-local-panel {
+        width: calc(100% - 24px);
+        max-height: 75%;
+        padding: 12px;
+    }
+
+    .wv-local-header h3 {
+        font-size: 15px;
+    }
+
+    .wv-local-panel p {
+        font-size: 12px;
+    }
 }
